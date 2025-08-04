@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Clicker</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2E7D32;
+            --highlight-color: #8BC34A;
+            --text-color: #333;
+            --light-text: #f5f5f5;
+            --background-color: #f9f9f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        .clicker-section {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .money-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+            color: var(--secondary-color);
+        }
+
+        .clicker-btn {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.1s, background-color 0.2s;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .clicker-btn:hover {
+            background-color: var(--highlight-color);
+        }
+
+        .clicker-btn:active {
+            transform: scale(0.95);
+        }
+
+        .click-feedback {
+            position: absolute;
+            color: white;
+            font-weight: bold;
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+        }
+
+        .upgrades-section {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .upgrade-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            width: 180px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .upgrade-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .upgrade-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .upgrade-card p {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .upgrade-card .cost {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .upgrade-btn {
+            width: 100%;
+            padding: 8px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .upgrade-btn:hover {
+            background-color: var(--highlight-color);
+        }
+
+        .upgrade-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .boosters-section {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .booster-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            width: 180px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .booster-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .booster-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .booster-card p {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .booster-card .cost {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .booster-btn {
+            width: 100%;
+            padding: 8px;
+            background-color: #FF9800;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .booster-btn:hover {
+            background-color: #FFA726;
+        }
+
+        .booster-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .booster-timer {
+            height: 4px;
+            background-color: #ddd;
+            margin-top: 10px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .booster-progress {
+            height: 100%;
+            background-color: #FF9800;
+            width: 0%;
+        }
+
+        .stats-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .stats-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-weight: bold;
+        }
+
+        .save-section {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .save-btn, .load-btn {
+            padding: 8px 15px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .save-btn:hover, .load-btn:hover {
+            background-color: #42A5F5;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .upgrades-section, .boosters-section {
+                flex-direction: column;
+                align-items: center;
+            }
+            .upgrade-card, .booster-card {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        /* Dark mode toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle">🌓</button>
+    
+    <header>
+        <h1>Super Clicker</h1>
+        <p>Click for money and unlock upgrades!</p>
+    </header>
+
+    <div class="game-container">
+        <div class="clicker-section">
+            <div class="money-display" id="moneyDisplay">$0.00</div>
+            <div class="clicker-btn" id="clickerBtn">
+                Click Me!
+                <div class="particles" id="particlesContainer"></div>
+            </div>
+        </div>
+
+        <div class="upgrades-section">
+            <h2>Multipliers</h2>
+            <div class="upgrade-card">
+                <h3>Click Power</h3>
+                <p>Increases money per click</p>
+                <p>Current: +<span id="clickPowerValue">1</span>$ per click</p>
+                <p class="cost">Cost: <span id="clickPowerCost">10</span>$</p>
+                <button class="upgrade-btn" id="clickPowerBtn">Buy</button>
+            </div>
+
+            <div class="upgrade-card">
+                <h3>Auto Clicker</h3>
+                <p>Earns money automatically</p>
+                <p>Current: <span id="autoClickerValue">0</span>$/s</p>
+                <p class="cost">Cost: <span id="autoClickerCost">50</span>$</p>
+                <button class="upgrade-btn" id="autoClickerBtn">Buy</button>
+            </div>
+
+            <div class="upgrade-card">
+                <h3>Click Efficiency</h3>
+                <p>Increases auto clicker power</p>
+                <p>Current: x<span id="clickEfficiencyValue">1</span></p>
+                <p class="cost">Cost: <span id="clickEfficiencyCost">100</span>$</p>
+                <button class="upgrade-btn" id="clickEfficiencyBtn">Buy</button>
+            </div>
+
+            <div class="upgrade-card">
+                <h3>Money Printer</h3>
+                <p>Generates money from investments</p>
+                <p>Current: <span id="moneyPrinterValue">0</span>$/s</p>
+                <p class="cost">Cost: <span id="moneyPrinterCost">500</span>$</p>
+                <button class="upgrade-btn" id="moneyPrinterBtn">Buy</button>
+            </div>
+        </div>
+
+        <div class="boosters-section">
+            <h2>Boosters</h2>
+            <div class="booster-card">
+                <h3>Click Frenzy</h3>
+                <p>Double click power for 30s</p>
+                <p class="cost">Cost: <span id="clickFrenzyCost">200</span>$</p>
+                <button class="booster-btn" id="clickFrenzyBtn">Activate</button>
+                <div class="booster-timer">
+                    <div class="booster-progress" id="clickFrenzyProgress"></div>
+                </div>
+            </div>
+            
+            <div class="booster-card">
+                <h3>Money Rain</h3>
+                <p>Triple passive income for 20s</p>
+                <p class="cost">Cost: <span id="moneyRainCost">300</span>$</p>
+                <button class="booster-btn" id="moneyRainBtn">Activate</button>
+                <div class="booster-timer">
+                    <div class="booster-progress" id="moneyRainProgress"></div>
+                </div>
+            </div>
+
+            <div class="booster-card">
+                <h3>Golden Click</h3>
+                <p>Next click gives 10x money</p>
+                <p class="cost">Cost: <span id="goldenClickCost">150</span>$</p>
+                <button class="booster-btn" id="goldenClickBtn">Activate</button>
+                <div class="booster-timer">
+                    <div class="booster-progress" id="goldenClickProgress"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <h2>Statistics</h2>
+            <div class="stat-row">
+                <span class="stat-label">Total Money Earned:</span>
+                <span id="totalMoneyEarned">$0.00</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Total Clicks:</span>
+                <span id="totalClicks">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Money Per Second:</span>
+                <span id="moneyPerSecond">$0.00</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Highest Click:</span>
+                <span id="highestClick">$0.00</span>
+            </div>
+        </div>
+
+        <div class="save-section">
+            <button class="save-btn" id="saveBtn">Save Game</button>
+            <button class="load-btn" id="loadBtn">Load Game</button>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Game state
+        let game = {
+            money: 0,
+            clickPower: 1,
+            autoClicker: 0,
+            clickEfficiency: 1,
+            moneyPrinter: 0,
+            totalMoneyEarned: 0,
+            totalClicks: 0,
+            highestClick: 0,
+            upgrades: {
+                clickPower: { level: 0, cost: 10 },
+                autoClicker: { level: 0, cost: 50 },
+                clickEfficiency: { level: 0, cost: 100 },
+                moneyPrinter: { level: 0, cost: 500 }
+            },
+            boosters: {
+                clickFrenzy: { active: false, cost: 200, duration: 30 },
+                moneyRain: { active: false, cost: 300, duration: 20 },
+                goldenClick: { active: false, cost: 150, duration: 1 }
+            },
+            boosterTimers: {
+                clickFrenzy: 0,
+                moneyRain: 0,
+                goldenClick: 0
+            },
+            soundEnabled: true
+        };
+
+        // DOM elements
+        const elements = {
+            moneyDisplay: document.getElementById('moneyDisplay'),
+            clickerBtn: document.getElementById('clickerBtn'),
+            clickPowerValue: document.getElementById('clickPowerValue'),
+            clickPowerCost: document.getElementById('clickPowerCost'),
+            clickPowerBtn: document.getElementById('clickPowerBtn'),
+            autoClickerValue: document.getElementById('autoClickerValue'),
+            autoClickerCost: document.getElementById('autoClickerCost'),
+            autoClickerBtn: document.getElementById('autoClickerBtn'),
+            clickEfficiencyValue: document.getElementById('clickEfficiencyValue'),
+            clickEfficiencyCost: document.getElementById('clickEfficiencyCost'),
+            clickEfficiencyBtn: document.getElementById('clickEfficiencyBtn'),
+            moneyPrinterValue: document.getElementById('moneyPrinterValue'),
+            moneyPrinterCost: document.getElementById('moneyPrinterCost'),
+            moneyPrinterBtn: document.getElementById('moneyPrinterBtn'),
+            clickFrenzyCost: document.getElementById('clickFrenzyCost'),
+            clickFrenzyBtn: document.getElementById('clickFrenzyBtn'),
+            clickFrenzyProgress: document.getElementById('clickFrenzyProgress'),
+            moneyRainCost: document.getElementById('moneyRainCost'),
+            moneyRainBtn: document.getElementById('moneyRainBtn'),
+            moneyRainProgress: document.getElementById('moneyRainProgress'),
+            goldenClickCost: document.getElementById('goldenClickCost'),
+            goldenClickBtn: document.getElementById('goldenClickBtn'),
+            goldenClickProgress: document.getElementById('goldenClickProgress'),
+            totalMoneyEarned: document.getElementById('totalMoneyEarned'),
+            totalClicks: document.getElementById('totalClicks'),
+            moneyPerSecond: document.getElementById('moneyPerSecond'),
+            highestClick: document.getElementById('highestClick'),
+            saveBtn: document.getElementById('saveBtn'),
+            loadBtn: document.getElementById('loadBtn'),
+            notification: document.getElementById('notification'),
+            particlesContainer: document.getElementById('particlesContainer'),
+            themeToggle: document.getElementById('themeToggle')
+        };
+
+        // Audio elements
+        const sounds = {
+            click: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3'),
+            upgrade: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3'),
+            booster: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3'),
+            money: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-coins-handling-1939.mp3')
+        };
+
+        // Initialize game
+        function init() {
+            updateUI();
+            setupEventListeners();
+            startGameLoop();
+            
+            // Random tip notification
+            setTimeout(() => {
+                showNotification("Tip: Click the button for money!");
+            }, 3000);
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            elements.clickerBtn.addEventListener('click', handleClick);
+            elements.clickPowerBtn.addEventListener('click', () => buyUpgrade('clickPower'));
+            elements.autoClickerBtn.addEventListener('click', () => buyUpgrade('autoClicker'));
+            elements.clickEfficiencyBtn.addEventListener('click', () => buyUpgrade('clickEfficiency'));
+            elements.moneyPrinterBtn.addEventListener('click', () => buyUpgrade('moneyPrinter'));
+            elements.clickFrenzyBtn.addEventListener('click', () => activateBooster('clickFrenzy'));
+            elements.moneyRainBtn.addEventListener('click', () => activateBooster('moneyRain'));
+            elements.goldenClickBtn.addEventListener('click', () => activateBooster('goldenClick'));
+            elements.saveBtn.addEventListener('click', saveGame);
+            elements.loadBtn.addEventListener('click', loadGame);
+            elements.themeToggle.addEventListener('click', toggleTheme);
+        }
+
+        // Start game loop for passive income
+        function startGameLoop() {
+            setInterval(() => {
+                // Calculate passive income
+                let passiveIncome = game.autoClicker * game.clickEfficiency + game.moneyPrinter;
+                
+                // Apply money rain booster if active
+                if (game.boosters.moneyRain.active) {
+                    passiveIncome *= 3;
+                    updateBoosterTimer('moneyRain');
+                }
+                
+                // Add passive income
+                if (passiveIncome > 0) {
+                    addMoney(passiveIncome / 10); // Divided by 10 because loop runs 10 times per second
+                }
+                
+                // Update booster timers
+                if (game.boosters.clickFrenzy.active) {
+                    updateBoosterTimer('clickFrenzy');
+                }
+                
+                // Update UI
+                updateUI();
+            }, 100); // Runs 10 times per second for smooth animation
+        }
+
+        // Handle click event
+        function handleClick() {
+            game.totalClicks++;
+            
+            // Calculate click value
+            let clickValue = game.clickPower;
+            
+            // Apply boosters
+            if (game.boosters.clickFrenzy.active) {
+                clickValue *= 2;
+            }
+            if (game.boosters.goldenClick.active) {
+                clickValue *= 10;
+                game.boosters.goldenClick.active = false;
+                elements.goldenClickProgress.style.width = '0%';
+                showNotification("Golden Click activated!");
+            }
+            
+            // Add money
+            addMoney(clickValue);
+            
+            // Update highest click
+            if (clickValue > game.highestClick) {
+                game.highestClick = clickValue;
+            }
+            
+            // Visual feedback
+            createClickFeedback(clickValue);
+            createParticles();
+            
+            // Play sound
+            if (game.soundEnabled) sounds.click.play();
+        }
+
+        // Add money to total
+        function addMoney(amount) {
+            game.money += amount;
+            game.totalMoneyEarned += amount;
+            
+            // Play money sound for larger amounts
+            if (amount >= 10 && game.soundEnabled) {
+                sounds.money.play();
+            }
+        }
+
+        // Buy upgrade
+        function buyUpgrade(type) {
+            const upgrade = game.upgrades[type];
+            
+            if (game.money >= upgrade.cost) {
+                game.money -= upgrade.cost;
+                
+                // Apply upgrade
+                switch (type) {
+                    case 'clickPower':
+                        game.clickPower += 1;
+                        break;
+                    case 'autoClicker':
+                        game.autoClicker += 1;
+                        break;
+                    case 'clickEfficiency':
+                        game.clickEfficiency += 0.5;
+                        break;
+                    case 'moneyPrinter':
+                        game.moneyPrinter += 5;
+                        break;
+                }
+                
+                // Increase cost
+                upgrade.level++;
+                upgrade.cost = Math.round(upgrade.cost * 1.5);
+                
+                // Visual feedback
+                showNotification(`${type.replace(/([A-Z])/g, ' $1')} upgraded!`);
+                if (game.soundEnabled) sounds.upgrade.play();
+                
+                // Update UI
+                updateUI();
+            } else {
+                showNotification("Not enough money!", true);
+            }
+        }
+
+        // Activate booster
+        function activateBooster(type) {
+            const booster = game.boosters[type];
+            
+            if (game.money >= booster.cost && !booster.active) {
+                game.money -= booster.cost;
+                booster.active = true;
+                game.boosterTimers[type] = booster.duration * 10; // Convert to 10ms ticks
+                
+                // Visual feedback
+                showNotification(`${type.replace(/([A-Z])/g, ' $1')} activated!`);
+                if (game.soundEnabled) sounds.booster.play();
+                
+                // Update UI
+                updateUI();
+            } else if (booster.active) {
+                showNotification("Booster already active!", true);
+            } else {
+                showNotification("Not enough money!", true);
+            }
+        }
+
+        // Update booster timer
+        function updateBoosterTimer(type) {
+            game.boosterTimers[type]--;
+            
+            // Update progress bar
+            const progressElement = elements[`${type}Progress`];
+            const booster = game.boosters[type];
+            progressElement.style.width = `${(game.boosterTimers[type] / (booster.duration * 10)) * 100}%`;
+            
+            // Deactivate if timer runs out
+            if (game.boosterTimers[type] <= 0) {
+                game.boosters[type].active = false;
+                progressElement.style.width = '0%';
+                showNotification(`${type.replace(/([A-Z])/g, ' $1')} expired!`);
+            }
+        }
+
+        // Update UI elements
+        function updateUI() {
+            // Money display
+            elements.moneyDisplay.textContent = `$${game.money.toFixed(2)}`;
+            
+            // Upgrade values and costs
+            elements.clickPowerValue.textContent = game.clickPower;
+            elements.clickPowerCost.textContent = game.upgrades.clickPower.cost;
+            
+            elements.autoClickerValue.textContent = game.autoClicker.toFixed(1);
+            elements.autoClickerCost.textContent = game.upgrades.autoClicker.cost;
+            
+            elements.clickEfficiencyValue.textContent = game.clickEfficiency.toFixed(1);
+            elements.clickEfficiencyCost.textContent = game.upgrades.clickEfficiency.cost;
+            
+            elements.moneyPrinterValue.textContent = game.moneyPrinter.toFixed(1);
+            elements.moneyPrinterCost.textContent = game.upgrades.moneyPrinter.cost;
+            
+            // Booster costs
+            elements.clickFrenzyCost.textContent = game.boosters.clickFrenzy.cost;
+            elements.moneyRainCost.textContent = game.boosters.moneyRain.cost;
+            elements.goldenClickCost.textContent = game.boosters.goldenClick.cost;
+            
+            // Disable buttons if not enough money
+            elements.clickPowerBtn.disabled = game.money < game.upgrades.clickPower.cost;
+            elements.autoClickerBtn.disabled = game.money < game.upgrades.autoClicker.cost;
+            elements.clickEfficiencyBtn.disabled = game.money < game.upgrades.clickEfficiency.cost;
+            elements.moneyPrinterBtn.disabled = game.money < game.upgrades.moneyPrinter.cost;
+            
+            elements.clickFrenzyBtn.disabled = game.money < game.boosters.clickFrenzy.cost || game.boosters.clickFrenzy.active;
+            elements.moneyRainBtn.disabled = game.money < game.boosters.moneyRain.cost || game.boosters.moneyRain.active;
+            elements.goldenClickBtn.disabled = game.money < game.boosters.goldenClick.cost || game.boosters.goldenClick.active;
+            
+            // Stats
+            elements.totalMoneyEarned.textContent = `$${game.totalMoneyEarned.toFixed(2)}`;
+            elements.totalClicks.textContent = game.totalClicks;
+            elements.moneyPerSecond.textContent = `$${(game.autoClicker * game.clickEfficiency + game.moneyPrinter).toFixed(2)}`;
+            elements.highestClick.textContent = `$${game.highestClick.toFixed(2)}`;
+        }
+
+        // Create click feedback animation
+        function createClickFeedback(value) {
+            const feedback = document.createElement('div');
+            feedback.className = 'click-feedback';
+            feedback.textContent = `+${value.toFixed(1)}$`;
+            feedback.style.left = `${Math.random() * 60 + 20}%`;
+            elements.clickerBtn.appendChild(feedback);
+            
+            // Remove after animation
+            setTimeout(() => {
+                feedback.remove();
+            }, 1000);
+        }
+
+        // Create particles animation
+        function createParticles() {
+            // Clear existing particles
+            elements.particlesContainer.innerHTML = '';
+            
+            // Create new particles
+            for (let i = 0; i < 10; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random properties
+                const size = Math.random() * 10 + 5;
+                const x = 50 + (Math.random() * 40 - 20);
+                const y = 50 + (Math.random() * 40 - 20);
+                const duration = Math.random() * 1 + 0.5;
+                const delay = Math.random() * 0.5;
+                
+                // Apply styles
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${x}%`;
+                particle.style.top = `${y}%`;
+                particle.style.animation = `floatUp ${duration}s ease-out ${delay}s forwards`;
+                particle.style.opacity = Math.random() * 0.5 + 0.5;
+                particle.style.transform = `rotate(${Math.random() * 360}deg)`;
+                
+                elements.particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Show notification
+        function showNotification(message, isError = false) {
+            const notification = elements.notification;
+            notification.textContent = message;
+            notification.style.backgroundColor = isError ? '#F44336' : '#4CAF50';
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Save game to localStorage
+        function saveGame() {
+            localStorage.setItem('superClickerSave', JSON.stringify(game));
+            showNotification("Game saved successfully!");
+        }
+
+        // Load game from localStorage
+        function loadGame() {
+            const save = localStorage.getItem('superClickerSave');
+            if (save) {
+                game = JSON.parse(save);
+                updateUI();
+                showNotification("Game loaded successfully!");
+            } else {
+                showNotification("No save data found!", true);
+            }
+        }
+
+        // Toggle dark mode
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            
+            if (isDark) {
+                document.documentElement.style.setProperty('--primary-color', '#2E7D32');
+                document.documentElement.style.setProperty('--secondary-color', '#1B5E20');
+                document.documentElement.style.setProperty('--highlight-color', '#689F38');
+                document.documentElement.style.setProperty('--text-color', '#f5f5f5');
+                document.documentElement.style.setProperty('--light-text', '#333');
+                document.documentElement.style.setProperty('--background-color', '#121212');
+            } else {
+                document.documentElement.style.setProperty('--primary-color', '#4CAF50');
+                document.documentElement.style.setProperty('--secondary-color', '#2E7D32');
+                document.documentElement.style.setProperty('--highlight-color', '#8BC34A');
+                document.documentElement.style.setProperty('--text-color', '#333');
+                document.documentElement.style.setProperty('--light-text', '#f5f5f5');
+                document.documentElement.style.setProperty('--background-color', '#f9f9f9');
+            }
+        }
+
+        // Initialize game when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
